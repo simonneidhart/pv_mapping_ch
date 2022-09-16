@@ -1,7 +1,6 @@
 /data/
 /.idea/
 /.venv/
-/data*/
 /__pycache__/
 
 # environment variables
