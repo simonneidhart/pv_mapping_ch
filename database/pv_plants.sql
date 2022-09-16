@@ -6,5 +6,7 @@ CREATE TABLE pv_plants (
     zipcode integer not null,
     lat real not null,
     long real not null,
-    power_kw real null
+    power_kw real null,
+    nearest_meter_id integer null,
+    constraint nearest_meter_id_fkey foreign key (nearest_meter_id) references pv_meters.id
 );
