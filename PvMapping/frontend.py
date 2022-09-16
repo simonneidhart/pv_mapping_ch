@@ -1,7 +1,7 @@
-from dash import Dash, dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+from dash import Dash, dcc, html
 
 app = Dash(__name__)
 
@@ -41,9 +41,9 @@ def serve_layout(df_pvin):
 if __name__ == "__main__":
     df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
 
-    ### TO-DO :
-    # 1. Read PV power [kW] of all PV systems from database
-    # 2. Write callback that continiously updates the dashboard (and reads new values from database)
+    # TODO:
+    #   1. Read PV power [kW] of all PV systems from database
+    #   2. Write callback that continiously updates the dashboard (and reads new values from database)
 
     app.layout = serve_layout(df_pv_measured)
     app.run_server(debug=True)
