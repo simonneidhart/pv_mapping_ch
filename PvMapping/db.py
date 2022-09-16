@@ -85,3 +85,24 @@ class Database:
                 (meter_id, plant_id),
             )
         self.connection.commit()
+
+    def get_meter_metadata(self) -> pd.DataFrame:
+        """Get metadata of the existing meters.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe containing columns "install_capacity", "slope". The index is an ID to be used for indexing the
+            time-series data.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT time_series_idx, installed_capacity_kw, slope_deg FROM pv_meters"
+        )
+        rows = cursor.fetchall()
+        df = pd.DataFrame(
+            rows, columns=["time_series_idx", "install_capacity", "slope"]
+        )
+        df.set_index("time_series_idx")
+        self.connection.commit()
+        return df

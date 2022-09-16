@@ -17,6 +17,12 @@ def test_set_nearest_meters() -> None:
     db.set_nearest_meters([0, 1, 2], [1, 2, 3])
 
 
+def test_get_meter_metadata() -> None:
+    db = Database()
+    db.get_meter_metadata()
+
+
 if __name__ == "__main__":
-    # test_get_lat_lon()
+    test_get_lat_lon()
     test_set_nearest_meters()
+    test_get_meter_metadata()
