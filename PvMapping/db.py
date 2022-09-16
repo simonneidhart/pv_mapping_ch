@@ -106,3 +106,17 @@ class Database:
         df.set_index("time_series_idx")
         self.connection.commit()
         return df
+
+    def get_total_realtime_power(self) -> float:
+        """Get the total power being produced in real time.
+
+        Returns
+        -------
+        float:
+            The total produced power [kW].
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT SUM(power_kw) FROM pv_plants")
+        row = cursor.fetchone()
+        self.connection.commit()
+        return row[0]
