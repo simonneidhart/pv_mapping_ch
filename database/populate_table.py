@@ -34,12 +34,7 @@ print("Downloading data...")
 df = pd.read_csv(download_path)
 print("head of downloaded data: ", df.head())
 print("Saving to table 'pv_realtime'")
-df.to_sql("pv_realtime", engine, if_exists="replace", chunksize=5000, index=True)
-
-
-
-
-
+df.to_sql("pv_realtime", engine, if_exists="replace", chunksize=5000, index=False)
 
 
 
