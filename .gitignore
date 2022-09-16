@@ -1,2 +1,6 @@
 /data/
 /.idea/
+
+
+# environment variables
+.env
