@@ -24,6 +24,21 @@ def serve_layout(df_pvin):
         original_data_marker=dict(size=4, opacity=0.6, color="deeppink")
     )
 
+    fig2 = px.scatter_mapbox(df_pvin, lat="lat", lon="lon", zoom=6, size=len(df_pvin) * [10])
+
+
+    fig2 = ff.create_hexbin_mapbox(
+        data_frame=df_pvin,
+        lat="lat",
+        lon="lon",
+        nx_hexagon=10,
+        opacity=0.5,
+        labels={"color": "Point Count"},
+        min_count=1,
+        show_original_data=True,
+        original_data_marker=dict(size=4, opacity=0.6, color="deeppink")
+    )
+
     fig.update_layout(
         autosize=False,
         width=2000,
@@ -41,11 +56,14 @@ def serve_layout(df_pvin):
 
 
 if __name__ == "__main__":
-    df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
-    
-    ### TO-DO : 
+    #df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
+
+    ev = pd.read_pickle('test.pkl')
+    print(ev.head())
+
+    ### TO-DO :
     # 1. Read PV power [kW] of all PV systems from database
     # 2. Write callback that continiously updates the dashboard (and reads new values from database)
-    
-    app.layout = serve_layout(df_pv_measured)
+
+    app.layout = serve_layout(ev)
     app.run_server(debug=True)
