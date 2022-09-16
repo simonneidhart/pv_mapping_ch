@@ -102,6 +102,15 @@ class PlantsMetaCH():
         """ Returns the plant metadata list in the desired output format
         """
         return(self.metadata)
+    
+    def get_singple_plant(self, plant_index:int):
+        """ Returns the metadata of a single plant
+        TODO: define a unique ID per plant, actually using the dataframe ix
+
+        Args:
+            plant_index (int): Plant index
+        """
+        return(self.metadata.iloc[plant_index])
 
 if __name__ == "__main__":
     pl = PlantsMetaCH()
