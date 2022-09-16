@@ -6,10 +6,12 @@ from time import time
 
 from ch_plants_metadata import PlantsMetaCH
 from hackdays_class import PVSimulator
+from write_to_db import PGSQL
 
 class SimulationSinglePlant():
     def __init__(
-        self, simulator:PVSimulator, plants_meta:PlantsMetaCH, plant_index:int, 
+        self, simulator:PVSimulator, pgsql_con:PGSQL, 
+        plants_meta:PlantsMetaCH, plant_index:int, 
         ghi:float, timestamp:datetime):
         """ Simulate AC power of a single PV plant, respectively part of a plant
         for plants with mutiple orientations, and for a single timestamp
@@ -22,6 +24,7 @@ class SimulationSinglePlant():
             timestamp (datetime): Timestamp
         """
         self.simulator = simulator
+        self.pgsql_con = pgsql_con
         self.plants_meta = plants_meta
         self.plant_index = plant_index
         self.ghi = ghi
@@ -71,15 +74,16 @@ class SimulationSinglePlant():
         self.pac_kw = sim_pac['Power_kW'][0]
     
     def save_results(self):
-        # TODO database handler
         print(
             f'SIM timestamp [{self.timestamp}] - plant [{self.plant_index}] - '
             f'PAC [{self.pac_kw} kW]')
+        self.pgsql_con.update_realtime_power(self.plant_index, self.pac_kw)
 
 class SimulationAllPlants():
     def __init__(self, input_data:pd.DataFrame):
         self.input_data = input_data
         self.simulator = PVSimulator()
+        self.pgsql_con = PGSQL()
         self.run()
     
     def run(self):
@@ -91,7 +95,8 @@ class SimulationAllPlants():
             ghi = row['ghi']
             plant_index = row['plant_index']
             sim = SimulationSinglePlant(
-                self.simulator, self.plants_meta, plant_index, ghi, timestamp)
+                self.simulator, self.pgsql_con, self.plants_meta, 
+                plant_index, ghi, timestamp)
             sim.run()
 
 if __name__ == '__main__':
