@@ -1,4 +1,4 @@
 pandas~=1.4.4
-#pvlib=0.9.1
+pvlib=0.9.1
 dash==2.6.1
 plotly~=5.10.0
