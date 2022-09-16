@@ -5,6 +5,8 @@ import dotenv
 dotenv.load_dotenv()
 
 class PGSQL():
+    """ Instanciate PostgreSQL database connection
+    """
     def __init__(self):
         host = os.getenv("POSTGRES_HOST")
         port = os.getenv("POSTGRES_PORT")
@@ -19,7 +21,13 @@ class PGSQL():
             host=host, port=port)
         print(self.connection)
     
-    def update_realtime_power(self, plant_id, pac_kw):
+    def update_realtime_power(self, plant_id:int, pac_kw:float):
+        """ Update realtime plant power
+
+        Args:
+            plant_id (int): Index of the plant
+            pac_kw (float): Realtime AC power of the plant
+        """
         cursor = self.connection.cursor()
         query = f"UPDATE pv_realtime SET power_kw={pac_kw} WHERE id={plant_id}"
         print(query)

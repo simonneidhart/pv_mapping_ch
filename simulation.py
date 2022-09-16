@@ -66,6 +66,9 @@ class SimulationSinglePlant():
             })
 
     def calculate_output_power(self):
+        """ Simulate the plant output powr from installed power, weather data,
+        module slope and orientation, plant location.
+        """
         start_time = time()
         sim_pac = self.simulator.pv_output(
             self.installed_power_kwp, self.weather, self.slope, 
@@ -74,6 +77,8 @@ class SimulationSinglePlant():
         self.pac_kw = sim_pac['Power_kW'][0]
     
     def save_results(self):
+        """ Save realtime AC power of the plant to database
+        """
         print(
             f'SIM timestamp [{self.timestamp}] - plant [{self.plant_index}] - '
             f'PAC [{self.pac_kw} kW]')
@@ -84,13 +89,12 @@ class SimulationAllPlants():
         self.input_data = input_data
         self.simulator = PVSimulator()
         self.pgsql_con = PGSQL()
+        self.plants_meta = PlantsMetaCH()
         self.run()
     
     def run(self):
-        self.plants_meta = PlantsMetaCH()
-        self.plants_iterator()
-    
-    def plants_iterator(self):
+        """ Lanch simulation of each individual plant
+        """
         for timestamp, row in self.input_data.iterrows():
             ghi = row['ghi']
             plant_index = row['plant_index']
@@ -100,6 +104,8 @@ class SimulationAllPlants():
             sim.run()
 
 if __name__ == '__main__':
+    """ For testing purpose only
+    """
     TEST_DATA = pd.DataFrame(
         index=[
             datetime(2022, 9, 16, 12), 
