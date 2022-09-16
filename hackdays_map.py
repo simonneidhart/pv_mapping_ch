@@ -41,6 +41,11 @@ def serve_layout(df_pvin):
 
 
 if __name__ == "__main__":
-    df_pvin = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
-    app.layout = serve_layout(df_pvin)
+    df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
+    
+    ### TO-DO : 
+    # 1. Read PV power [kW] of all PV systems from database
+    # 2. Write callback that continiously updates the dashboard (and reads new values from database)
+    
+    app.layout = serve_layout(df_pv_measured)
     app.run_server(debug=True)
