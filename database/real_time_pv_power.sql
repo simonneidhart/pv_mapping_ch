@@ -4,7 +4,7 @@ CREATE TABLE pv_realtime (
   zipcode INTEGER NOT NULL,
   lat REAL NOT NULL,
   lon REAL NOT NULL,
-  power_kW REAL
+  power_kw REAL
 );
 
 
