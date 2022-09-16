@@ -32,6 +32,6 @@ Prerequisite is that docker is installed on your system.
 
 1. Run `docker compose up -d` in this folder to start the database.
 2. Specify a URL to the .csv file containing the PV plants coordinates and their plant id's.
-3. Run `python3 ./data/populate_table.py` to download the dataset and fill it into the database.
+3. Run `python3 ./database/populate_table.py` to download the dataset and fill it into the database.
 
 
