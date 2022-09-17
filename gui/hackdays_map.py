@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
@@ -14,9 +15,11 @@ def serve_layout(df_pvin):
         lon="lon",
         nx_hexagon=30,
         animation_frame='ts',
+        color='kW',
+        agg_func=np.sum,
         opacity=0.5,
         color_continuous_scale="Cividis",
-        labels={"color": "Power",  "frame": "Period"},
+        labels={"color": "PV Power [kW]",  "frame": "Period"},
         min_count=1,
     )
 
