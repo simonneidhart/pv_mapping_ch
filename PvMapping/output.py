@@ -47,7 +47,11 @@ class PVSimulator:
         ----------
         simulated pv production (kW)
         """
-
+        # TODO: If the GHI is zero, the simulation won't work. There's a
+        # better fix for this out there.
+        if weather_data.ghi.item() == 0.0:
+            return 0.0
+        
         location = pvlib.location.Location(latitude=lat, longitude=lon)
         system = PVSystem(
             surface_tilt=slope,
@@ -63,4 +67,4 @@ class PVSimulator:
         mc.run_model(weather_data)
 
         num_modules = round(installed_capacity * 1000 / self.modules.STC)
-        return mc.results.dc.p_mp.values[0] * self.PR * num_modules
+        return mc.results.dc.p_mp.values[0] / 1e3 * self.PR * num_modules

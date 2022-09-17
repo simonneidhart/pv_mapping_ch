@@ -55,7 +55,9 @@ def ingest() -> None:
                 estimated_power = output_simulator.pv_output(
                     installed_capacity=plant.installed_capacity_kw,
                     weather_data=pd.DataFrame.from_dict(
-                        {"ghi": [ghi], "dni": [dni], "dhi": [dhi]}
+                        {item.timestamp: [ghi, dni, dhi]},
+                        orient="index",
+                        columns=["ghi", "dni", "dhi"],
                     ),
                     slope=int(plant.slope_deg),
                     orientation=int(plant.orientation_deg),
@@ -67,6 +69,7 @@ def ingest() -> None:
 
             # Perform batched update of real-time power estimate for all affected plants.
             db.update_realtime_power(
+                timestamp=item.timestamp,
                 plant_ids=plant_ids,
                 powers_kw=estimated_powers_kw,
             )
