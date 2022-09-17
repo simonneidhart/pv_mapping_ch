@@ -67,14 +67,14 @@ class Database:
             raise ValueError("Same number of plant_ids and powers_kw required")
 
         cursor = self.connection.cursor()
+        values = [
+            (timestamp, plant_id, power_kw)
+            for plant_id, power_kw in zip(plant_ids, powers_kw)
+        ]
         execute_values(
             cursor,
             "INSERT INTO pv_real_time (timestamp, plant_id, power_kw) VALUES %s",
-            (
-                len(plant_ids) * [timestamp],
-                plant_ids,
-                powers_kw,
-            ),
+            argslist=values,
             page_size=1000,
         )
         self.connection.commit()
