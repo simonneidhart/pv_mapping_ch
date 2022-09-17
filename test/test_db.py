@@ -1,3 +1,5 @@
+import pprint
+
 import dotenv
 
 from PvMapping.db import Database
@@ -22,13 +24,14 @@ def test_get_meter_metadata() -> None:
     db.get_meters()
 
 
-def test_get_total_realtime_power() -> None:
+def test_get_real_time_data() -> None:
     db = Database()
-    print(f"Total power: {db.get_total_realtime_power()}kW")
+    df = db.get_real_time_data(duration_hours=1)
+    pprint.pp(df)
 
 
 if __name__ == "__main__":
-    test_get_lat_lon()
-    test_set_nearest_meters()
-    test_get_meter_metadata()
-    test_get_total_realtime_power()
+    # test_get_lat_lon()
+    # test_set_nearest_meters()
+    # test_get_meter_metadata()
+    test_get_real_time_data()

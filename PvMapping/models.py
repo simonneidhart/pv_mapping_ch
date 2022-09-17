@@ -3,6 +3,8 @@ from __future__ import annotations
 import dataclasses
 from typing import Optional
 
+import numpy as np
+
 
 @dataclasses.dataclass
 class Plant:
@@ -19,7 +21,6 @@ class Plant:
     canton: str
 
     nearest_meter_id: Optional[int]
-    power_kw: Optional[float]
 
 
 @dataclasses.dataclass
@@ -33,3 +34,10 @@ class Meter:
     orientation_deg: float
     municipality: str
     address: str
+
+
+@dataclasses.dataclass
+class RealTime:
+    timestamp: np.timestamp64
+    plant_id: int
+    power_kw: float

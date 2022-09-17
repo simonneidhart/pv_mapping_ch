@@ -1,7 +1,9 @@
 import logging
 import os
+from datetime import datetime, timedelta, timezone
 
 import dotenv
+import numpy as np
 import pandas as pd
 import psycopg2 as pg
 import sqlalchemy.engine
@@ -51,10 +53,13 @@ class Database:
             + self.database
         )
 
-    def update_realtime_power(self, plant_ids: list[int], powers_kw: list[float]):
+    def update_realtime_power(
+        self, timestamp: np.datetime64, plant_ids: list[int], powers_kw: list[float]
+    ):
         """Update the real-time power production for plants.
 
         Args:
+            timestamp: The timestamp of the data.
             plant_ids: The primary keys of the plants to update.
             powers_kw: The estimated power production of each plant in kilowatts.
         """
@@ -64,7 +69,8 @@ class Database:
         cursor = self.connection.cursor()
         for plant_id, power_kw in zip(plant_ids, powers_kw):
             cursor.execute(
-                "UPDATE pv_plants SET power_kw=%s WHERE id=%s", (power_kw, plant_id)
+                "INSERT INTO pv_real_time (timestamp, plant_id, power_kw) VALUES (%s, %s, %s)",
+                (timestamp, power_kw, plant_id),
             )
         self.connection.commit()
 
@@ -151,20 +157,6 @@ class Database:
         self.connection.commit()
         return meters
 
-    def get_total_realtime_power(self) -> float:
-        """Get the total power being produced in real time.
-
-        Returns
-        -------
-        float:
-            The total produced power [kW].
-        """
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT SUM(power_kw) FROM pv_plants")
-        row = cursor.fetchone()
-        self.connection.commit()
-        return row[0]
-
     def get_affected_plants(self, meter_id: int) -> list[Plant]:
         """Get all plants whose power estimate is affected by the irradiance estimate of a meter.
 
@@ -180,7 +172,7 @@ class Database:
         """
         cursor = self.connection.cursor()
         cursor.execute(
-            "SELECT id, xtf_id, lat, lon, installed_capacity_kw, slope_deg, orientation_deg, municipality, address, zipcode, canton, nearest_meter_id, power_kw "
+            "SELECT id, xtf_id, lat, lon, installed_capacity_kw, slope_deg, orientation_deg, municipality, address, zipcode, canton, nearest_meter_id "
             "FROM pv_plants WHERE nearest_meter_id = %s",
             (meter_id,),
         )
@@ -199,9 +191,35 @@ class Database:
                 zipcode=row[9],
                 canton=row[10],
                 nearest_meter_id=row[11],
-                power_kw=row[12],
             )
             for row in rows
         ]
         self.connection.commit()
         return plants
+
+    def get_real_time_data(self, duration_hours: int) -> pd.DataFrame:
+        """Get the real-time data for the preceding hours.
+
+        Parameters
+        ----------
+        duration_hours
+            The number of hours before now since which to include data.
+
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with timestamp index and columns "power_kw", "lat", "lon".
+        """
+        earliest_timestamp = datetime.utcnow() - timedelta(hours=duration_hours)
+        cursor = self.connection.cursor()
+        cursor.execute(
+            "SELECT timestamp, power_kw, lat, lon FROM pv_real_time "
+            "JOIN pv_plants ON pv_plants.id = pv_real_time.plant_id "
+            "WHERE timestamp >= %s",
+            (earliest_timestamp,),
+        )
+        data = cursor.fetchall()
+        self.connection.commit()
+        df = pd.DataFrame(data=data, columns=["timestamp", "power_kw", "lat", "lon"])
+        df = df.set_index("timestamp")
+        return df
