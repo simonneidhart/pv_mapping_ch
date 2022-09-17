@@ -4,5 +4,7 @@
 /data*/
 /__pycache__/
 
+.pkl
+
 # environment variables
 .env
