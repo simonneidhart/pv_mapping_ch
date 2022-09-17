@@ -1,7 +1,7 @@
-from dash import Dash, dcc, html, Input, Output
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
+from dash import Dash, dcc, html
 
 from write_to_db import PGSQL
 
@@ -13,23 +13,22 @@ def serve_layout(df_pvin):
     px.set_mapbox_access_token(sMBT)
     fig = px.scatter_mapbox(df_pvin, lat="lat", lon="lon", zoom=6, size=len(df_pvin) * [10])
 
-
     fig = ff.create_hexbin_mapbox(
         data_frame=df_pvin,
         lat="lat",
         lon="lon",
-        nx_hexagon=10,
+        nx_hexagon=100,
         opacity=0.5,
         labels={"color": "Point Count"},
         min_count=1,
-        show_original_data=True,
-        original_data_marker=dict(size=4, opacity=0.6, color="deeppink")
+        # show_original_data=True,
+        # original_data_marker=dict(size=4, opacity=0.6, color="deeppink")
     )
 
     fig.update_layout(
         autosize=False,
-        width=2000,
-        height=1000,
+        width=1400,
+        height=800,
         margin=dict(l=0, r=35, t=0, b=0),
         mapbox={
             'style': 'dark',
@@ -45,12 +44,13 @@ def serve_layout(df_pvin):
 if __name__ == "__main__":
     df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
     do_curs = PGSQL().do_connection.cursor()
-    do_curs.execute("SELECT * FROM PV_METERS")
-    some_meters = do_curs.fetchall()
+    do_curs.execute("SELECT ID, LAT, LON FROM PV_PLANTS")
+    pv_plants = do_curs.fetchall()
+    df_pv_plants = pd.DataFrame(pv_plants, columns=['id', 'lat', 'lon'])
 
     ### TO-DO : 
     # 1. Read PV power [kW] of all PV systems from database
     # 2. Write callback that continiously updates the dashboard (and reads new values from database)
-    
-    app.layout = serve_layout(df_pv_measured)
+
+    app.layout = serve_layout(df_pv_plants)
     app.run_server(debug=True)
