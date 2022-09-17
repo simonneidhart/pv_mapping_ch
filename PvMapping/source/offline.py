@@ -15,8 +15,8 @@ class OfflineSourceThread(SourceThread):
 
             row = df.loc[timestamp].dropna()
             sample = row.sample()
-            name, power_kw = sample.index[0], sample.values[0]
-            item = SourceItem(timestamp=timestamp, power_kw=power_kw, name=name)
+            meter_id, power_kw = sample.index[0], sample.values[0]
+            item = SourceItem(timestamp=timestamp, power_kw=power_kw, meter_id=meter_id)
             self._queue.put(item)
 
             time.sleep(1.0)
