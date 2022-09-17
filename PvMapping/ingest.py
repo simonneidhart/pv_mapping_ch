@@ -25,6 +25,14 @@ def ingest() -> None:
     meter_metadata = db.get_meters()
     output_simulator = PVSimulator()
 
+    out_df = pd.DataFrame(
+        {
+            "timestamp": pd.Series(dtype="datetime64[ns]"),
+            "plant_id": pd.Series(dtype="int64"),
+            "power_kw": pd.Series(dtype="float64"),
+        }
+    )
+
     while True:
         try:
             item: SourceItem = ingest_queue.get(block=True, timeout=0.25)
@@ -68,11 +76,21 @@ def ingest() -> None:
                 estimated_powers_kw.append(estimated_power)
 
             # Perform batched update of real-time power estimate for all affected plants.
-            db.update_realtime_power(
-                timestamp=item.timestamp,
-                plant_ids=plant_ids,
-                powers_kw=estimated_powers_kw,
-            )
+            for plant_id, power_kw in zip(plant_ids, estimated_powers_kw):
+                out_df = pd.concat(
+                    (
+                        out_df,
+                        pd.DataFrame(
+                            {
+                                "timestamp": [item.timestamp],
+                                "plant_id": [plant_id],
+                                "power_kw": [power_kw],
+                            },
+                        ),
+                    )
+                )
+
+            out_df.to_pickle("/home/mathis/Downloads/pv_real_time.pkl")
 
         except queue.Empty:
             pass
