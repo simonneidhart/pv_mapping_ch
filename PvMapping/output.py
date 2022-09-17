@@ -45,13 +45,13 @@ class PVSimulator:
 
         Returns
         ----------
-        simulated pv production (kW) as pd.DataFrame
+        simulated pv production (kW)
         """
 
         location = pvlib.location.Location(latitude=lat, longitude=lon)
         system = PVSystem(
             surface_tilt=slope,
-            surface_azimuth=orientation + 180,
+            surface_azimuth=orientation,
             module_parameters=self.modules,
             inverter_parameters=self.inverter,
             temperature_model_parameters=self.temperature_model_parameters,
@@ -63,7 +63,4 @@ class PVSimulator:
         mc.run_model(weather_data)
 
         num_modules = round(installed_capacity * 1000 / self.modules.STC)
-        res = mc.results.dc.p_mp * self.PR * num_modules
-        ac_power = pd.DataFrame(list(res), columns=["Power_kW"])
-
-        return ac_power
+        return mc.results.dc.p_mp.values[0] * self.PR * num_modules

@@ -5,7 +5,9 @@ import dotenv
 import pandas as pd
 import psycopg2 as pg
 import sqlalchemy.engine
+from psycopg2.extras import execute_values, execute_batch
 from sqlalchemy import create_engine
+from tqdm import tqdm
 
 from PvMapping.models import Meter, Plant
 
@@ -106,11 +108,16 @@ class Database:
             raise ValueError("Same number of plate_ids and meter_ids required")
 
         cursor = self.connection.cursor()
-        for plant_id, meter_id in zip(plant_ids, meter_ids):
-            cursor.execute(
-                "UPDATE pv_plants SET nearest_meter_id=%s WHERE id=%s",
-                (meter_id, plant_id),
-            )
+        cursor.execute(
+            "PREPARE neighbor_stmt AS UPDATE pv_plants SET nearest_meter_id = $1 WHERE id = $2"
+        )
+        execute_batch(
+            cursor,
+            "EXECUTE neighbor_stmt (%s, %s)",
+            list(zip(meter_ids, plant_ids)),
+            page_size=1000,
+        )
+        cursor.execute("DEALLOCATE neighbor_stmt")
         self.connection.commit()
 
     def get_meters(self) -> dict[int, Meter]:
