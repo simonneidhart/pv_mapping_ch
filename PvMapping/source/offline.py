@@ -1,13 +1,17 @@
+import os
 import time
 
+import dotenv
 import pandas as pd
 
 from PvMapping.source import SourceThread, SourceItem
 
+dotenv.load_dotenv()
+
 
 class OfflineSourceThread(SourceThread):
     def run(self) -> None:
-        df = pd.read_pickle("/home/mathis/Downloads/2022-08.pkl")
+        df = pd.read_pickle(os.environ.get("TIME_SERIES_FILE_PATH"))
         for timestamp in df.index:
 
             if self._should_stop:
