@@ -67,15 +67,16 @@ class Database:
             raise ValueError("Same number of plant_ids and powers_kw required")
 
         cursor = self.connection.cursor()
-        for plant_id, power_kw in zip(plant_ids, powers_kw):
-            cursor.execute(
-                "INSERT INTO pv_real_time (timestamp, plant_id, power_kw) VALUES (%s, %s, %s)",
-                (
-                    timestamp,
-                    plant_id,
-                    power_kw,
-                ),
-            )
+        execute_values(
+            cursor,
+            "INSERT INTO pv_real_time (timestamp, plant_id, power_kw) VALUES %s",
+            (
+                len(plant_ids) * [timestamp],
+                plant_ids,
+                powers_kw,
+            ),
+            page_size=1000,
+        )
         self.connection.commit()
 
     def get_lat_lon(self) -> tuple[pd.DataFrame, pd.DataFrame]:
