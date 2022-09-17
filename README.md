@@ -4,11 +4,6 @@ Map the total pv power produced in Switzerland in real-time
 # File Overview
 ```
 .
-├── data_cleaning
-│   ├── clean_pv_meters_data.ipynb
-│   ├── clean_pv_plants_data.ipynb
-│   ├── combine-ch-pv-systems-meta.py
-│   └── timeseries_crunching.ipynb
 ├── PvMapping
 │   ├── db.py                               # Database access layer
 │   ├── frontend.py                         # Entrypoint for launching dashboard using plotly
