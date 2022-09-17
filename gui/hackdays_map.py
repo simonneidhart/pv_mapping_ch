@@ -13,7 +13,7 @@ def serve_layout(df_pvin):
         data_frame=df_pvin,
         lat="lat",
         lon="lon",
-        nx_hexagon=30,
+        nx_hexagon=200,
         animation_frame='ts',
         color='kW',
         agg_func=np.sum,
@@ -25,17 +25,40 @@ def serve_layout(df_pvin):
 
     fig.update_layout(
         autosize=True,
+        width=2000,
+        height=1000,
         margin=dict(l=0, r=35, t=0, b=0),
         mapbox={'style': 'dark'},
     )
     fig.layout.sliders[0].pad.t=20
     fig.layout.updatemenus[0].pad.t=40
+    
+    return html.Div(
+        children=[
+        # Header and Logo
+        html.Pre(
+            children=[
+                html.Img(src=app.get_asset_url('aliunid.png'),
+                    id = 'aliunid_logo',
+                    style={'height': '60px',
+                        'width': 'auto',
+                        'margin-bottom': '50px',
+                        'margin-left': '-35px',
+                        'margin-top': '-70px',}
+                )
+            ]
+        ),
+        # Page title
+        html.H1("Real Time PV Map"),
+        html.Div(dcc.Graph(id='map', figure=fig))
+        ]
+    )
 
-    return html.Div(dcc.Graph(id='map', figure=fig))
+    #return html.Div(dcc.Graph(id='map', figure=fig))
 
 def get_real_time_data(duration_hours: int) -> pd.DataFrame:
-    # local stub
-    return pd.read_pickle('../data/day_09-01.pkl')
+    df = pd.read_pickle('day_09-01.pkl').head(10000)
+    return df
 
 if __name__ == "__main__":
     df = get_real_time_data(9000)
