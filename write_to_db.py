@@ -32,3 +32,8 @@ class PGSQL():
         query = f"UPDATE pv_realtime SET power_kw={pac_kw} WHERE id={plant_id}"
         print(query)
         cursor.execute(query)
+
+if __name__ == '__main__':
+    """ For testing purpose only
+    """
+    pgsql_con = PGSQL()
