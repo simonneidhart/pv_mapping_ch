@@ -44,8 +44,10 @@ def serve_layout(df_pvin):
 
 if __name__ == "__main__":
     df_pv_measured = pd.read_excel("data/Liste_PV_available.xlsx", header=0)
-    do_conn = PGSQL().do_connection
-    some_meters = do_conn.cursor().execute("SELECT * FROM PV_METERS")
+    do_curs = PGSQL().do_connection.cursor()
+    do_curs.execute("SELECT * FROM PV_METERS")
+    some_meters = do_curs.fetchall()
+
     ### TO-DO : 
     # 1. Read PV power [kW] of all PV systems from database
     # 2. Write callback that continiously updates the dashboard (and reads new values from database)
