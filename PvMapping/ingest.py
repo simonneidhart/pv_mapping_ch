@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 import queue
 
+import pandas as pd
+
 from PvMapping.db import Database
 from PvMapping.irradiance import get_ghi, get_dni_dhi
 from PvMapping.output import PVSimulator
@@ -52,7 +54,9 @@ def ingest() -> None:
             for plant in affected_plants:
                 estimated_power = output_simulator.pv_output(
                     installed_capacity=plant.installed_capacity_kw,
-                    weather_data={"ghi": ghi, "dni": dni, "dhi": dhi},
+                    weather_data=pd.DataFrame.from_dict(
+                        {"ghi": [ghi], "dni": [dni], "dhi": [dhi]}
+                    ),
                     slope=int(plant.slope_deg),
                     orientation=int(plant.orientation_deg),
                     lat=plant.lat,
@@ -61,6 +65,7 @@ def ingest() -> None:
                 plant_ids.append(plant.id_)
                 estimated_powers_kw.append(estimated_power)
 
+            # Perform batched update of real-time power estimate for all affected plants.
             db.update_realtime_power(
                 plant_ids=plant_ids,
                 powers_kw=estimated_powers_kw,
