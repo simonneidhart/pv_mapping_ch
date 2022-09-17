@@ -29,6 +29,7 @@ def serve_layout(df_pvin):
         height=1000,
         margin=dict(l=0, r=35, t=0, b=0),
         mapbox={'style': 'dark'},
+
     )
     fig.layout.sliders[0].pad.t=20
     fig.layout.updatemenus[0].pad.t=40
@@ -45,7 +46,15 @@ def serve_layout(df_pvin):
                         'margin-bottom': '50px',
                         'margin-left': '-35px',
                         'margin-top': '-70px',}
-                )
+                ),
+                html.Img(src=app.get_asset_url('hackdays.png'),
+                                        id = 'hackdays',
+                                        style={'height': '60px',
+                                            'width': 'auto',
+                                            'margin-bottom': '50px',
+                                            'margin-left': '100px',
+                                            'margin-top': '-70px',}
+                                    ),
             ]
         ),
         # Page title
