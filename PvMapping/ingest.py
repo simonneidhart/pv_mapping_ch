@@ -33,8 +33,8 @@ def ingest() -> None:
 
             # Calculate global horizontal irradiance [W/m^2] at meter location.
             ghi = get_ghi(
-                power=item.power_kw / 1e3,
-                installed_capacity=meter.installed_capacity_kw / 1e3,
+                power=item.power_kw * 1e3,
+                installed_capacity=meter.installed_capacity_kw * 1e3,
                 slope=meter.slope_deg,
             )
 

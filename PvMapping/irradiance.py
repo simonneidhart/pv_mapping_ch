@@ -27,7 +27,7 @@ def get_ghi(power: float, installed_capacity: float, slope: float) -> float:
     if power < 0:
         power = -power
 
-    return power * 1e6 / installed_capacity / math.cos(math.radians(slope))
+    return power * 1e3 / installed_capacity / math.cos(math.radians(slope))
 
 
 def get_dni_dhi(lat, lon, timestamp, ghi) -> tuple[float, float]:
