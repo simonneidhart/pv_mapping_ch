@@ -18,13 +18,11 @@ def serve_layout(df_pvin):
         lat="lat",
         lon="lon",
         nx_hexagon=100,
-        animation_frame=df_pvin['frame'],
+        animation_frame=df_pvin['timestamp'],
         opacity=0.5,
         color_continuous_scale="Cividis",
-        labels={"color": "Point Count",  "frame": "Period"},
+        labels={"color": "Power",  "frame": "Period"},
         min_count=1,
-        # show_original_data=True,
-        # original_data_marker=dict(size=4, opacity=0.6, color="deeppink")
     )
 
     fig.update_layout(
@@ -43,10 +41,10 @@ if __name__ == "__main__":
     do_curs.execute("SELECT ID, LAT, LON FROM PV_PLANTS")
     pv_plants = do_curs.fetchall()
     df_pv_plants = pd.DataFrame(pv_plants, columns=['id', 'lat', 'lon'])
-    df_pv_plants['frame']=1
+    df_pv_plants['timestamp']=1
 
     df_pv_plants_2 = pd.DataFrame(pv_plants, columns=['id', 'lat', 'lon'])
-    df_pv_plants_2['frame']=2
+    df_pv_plants_2['timestamp']=2
 
     df_pv_plants = pd.concat([df_pv_plants, df_pv_plants_2], axis=0)
 
