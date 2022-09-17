@@ -70,7 +70,11 @@ class Database:
         for plant_id, power_kw in zip(plant_ids, powers_kw):
             cursor.execute(
                 "INSERT INTO pv_real_time (timestamp, plant_id, power_kw) VALUES (%s, %s, %s)",
-                (timestamp, power_kw, plant_id),
+                (
+                    timestamp,
+                    plant_id,
+                    power_kw,
+                ),
             )
         self.connection.commit()
 
