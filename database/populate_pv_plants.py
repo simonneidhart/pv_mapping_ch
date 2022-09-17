@@ -1,14 +1,8 @@
-import sqlalchemy
 import os
+
 import dotenv
 import pandas as pd
-
-"""
-This file is meant to be run when the PostgreSQL instance for the API is instantiated.
-
-.csv files which are to be loaded into the database are downloaded from URLs and
-PostgreSQL tables are generated from them.
-"""
+import sqlalchemy
 
 dotenv.load_dotenv()
 
@@ -34,10 +28,5 @@ DATABASE_URL_SQLALCHEMY = (
 # engine = sqlalchemy.create_engine(DATABASE_URL_SQLALCHEMY, execution_options=dict(stream_results=True))
 engine = sqlalchemy.create_engine(DATABASE_URL_SQLALCHEMY)
 
-download_path = os.getenv("PV_PLANTS_TABLE_URL")
-
-print("Downloading data...")
-df = pd.read_csv(download_path)
-print("head of downloaded data: ", df.head())
-print("Saving to table 'pv_plants'")
-df.to_sql("pv_plants", engine, if_exists="replace", chunksize=5000, index=False)
+df = pd.read_pickle("/home/mathis/Downloads/pv_meters.pkl")
+df.to_sql("pv_meters", engine, if_exists="replace", chunksize=5000, index=False)

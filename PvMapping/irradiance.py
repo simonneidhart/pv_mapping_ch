@@ -2,8 +2,11 @@
 of some PV plants with power meters."""
 import math
 
+from pvlib.irradiance import erbs
+from pvlib.location import Location
 
-def ghi(power: float, installed_capacity: float, slope: float) -> float:
+
+def get_ghi(power: float, installed_capacity: float, slope: float) -> float:
     """Calculate the global horizontal irradiance.
 
     Parameters
@@ -11,7 +14,7 @@ def ghi(power: float, installed_capacity: float, slope: float) -> float:
     power
         The instantaneous power [W].
     installed_capacity
-        Nominal power under standard test conditions [W/m2].
+        Nominal power under standard test conditions [W].
     slope
         The slope [deg].
 
@@ -25,3 +28,29 @@ def ghi(power: float, installed_capacity: float, slope: float) -> float:
         power = -power
 
     return power * 1e6 / installed_capacity / math.cos(math.radians(slope))
+
+
+def get_dni_dhi(lat, lon, timestamp, ghi) -> tuple[float, float]:
+    """Calculate DNI and DHI from the GHI using the Erbs model.
+
+    Parameters
+    ----------
+    lat
+        The latitude in decimal degrees.
+    lon
+        The longitude in decimal degrees.
+    timestamp
+        The time at which the GHI was measured.
+    ghi
+        Global horizontal irradiance [W/m^2]
+
+    Returns
+    -------
+    tuple
+        The DNI and DHI in W/m^2
+    """
+    loc = Location(lat, lon)
+    sol_pos = loc.get_solarposition(timestamp)
+    zenith = sol_pos["zenith"]
+    irradiance = erbs(ghi, zenith, timestamp)
+    return float(irradiance["dni"]), float(irradiance["dhi"])

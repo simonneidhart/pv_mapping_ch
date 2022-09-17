@@ -19,7 +19,7 @@ def test_set_nearest_meters() -> None:
 
 def test_get_meter_metadata() -> None:
     db = Database()
-    db.get_meter_metadata()
+    db.get_meters()
 
 
 def test_get_total_realtime_power() -> None:
