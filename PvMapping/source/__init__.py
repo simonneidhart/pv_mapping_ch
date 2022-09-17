@@ -12,7 +12,7 @@ import numpy as np
 class SourceItem:
     timestamp: np.datetime64
     power_kw: float
-    name: str
+    meter_id: int
 
 
 class SourceThread(threading.Thread, metaclass=abc.ABCMeta):
