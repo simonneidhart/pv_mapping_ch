@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 from dash import Dash, dcc, html
+import plotly.graph_objects as go
 
 from datetime import datetime
 import dotenv
@@ -18,7 +19,7 @@ dotenv.load_dotenv()
 
 app = Dash(__name__)
 
-def serve_layout(df_pvin):
+def serve_layout(df_pvin, pv_sum):
     px.set_mapbox_access_token('pk.eyJ1IjoiY2hyaXN0b3BoaHVuemlrZXIiLCJhIjoiY2pqc2swc253Mnd0aTN3cGJucG41dWExOSJ9.6mhBXjFCMSzNQRk8u6LTHQ')
 
     fig = ff.create_hexbin_mapbox(
@@ -45,7 +46,16 @@ def serve_layout(df_pvin):
     )
     fig.layout.sliders[0].pad.t=20
     fig.layout.updatemenus[0].pad.t=40
-    
+
+    figheight=700
+    line_figure = go.Figure(layout={"height":figheight})
+    line_figure.add_trace(go.Scatter(x=pv_sum.index, y=pv_sum['kW'], fill='tozeroy', name='Total Power [kW]'))
+
+    line_figure.update_layout(
+        xaxis_title="Timestamp (UTC)",
+        yaxis_title="kW",
+    )
+
     return html.Div(
         children=[
         # Header and Logo
@@ -57,7 +67,7 @@ def serve_layout(df_pvin):
                         'width': 'auto',
                         'margin-bottom': '50px',
                         'margin-left': '-35px',
-                        'margin-top': '-70px',}
+                        'margin-top': '-50px',}
                 ),
                 html.Img(src=app.get_asset_url('hackdays.png'),
                                         id = 'hackdays',
@@ -65,13 +75,15 @@ def serve_layout(df_pvin):
                                             'width': 'auto',
                                             'margin-bottom': '50px',
                                             'margin-left': '100px',
-                                            'margin-top': '-70px',}
+                                            'margin-top': '-50px',}
                                     ),
             ]
         ),
         # Page title
         html.H1("Real Time PV Map"),
-        html.Div(dcc.Graph(id='map', figure=fig))
+        html.Div(dcc.Graph(id='map', figure=fig)),
+        html.H1("Daily PV Production"),
+        html.Div(dcc.Graph(id='sum', figure=line_figure))
         ]
     )
 
@@ -123,5 +135,7 @@ def get_real_time_data():
 if __name__ == "__main__":
     df = get_real_time_data()
     df['ts'] = df.index.astype(str)
-    app.layout = serve_layout(df)
+    pv_sum = df.drop(columns=['ts','lat','lon'])
+    pv_sum = pv_sum.groupby(pv_sum.index).sum()
+    app.layout = serve_layout(df,pv_sum)
     app.run_server(host="0.0.0.0", port=4200)
