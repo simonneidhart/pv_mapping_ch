@@ -1,6 +1,6 @@
 version: '3'
 services:
-    veggiebox:
-        image: io42630/ofh2022-veggiebox:0.7
+    pv-animation:
+        image: io42630/odh2022-pv-animation:0.1
         ports:
             - "4200:4200"

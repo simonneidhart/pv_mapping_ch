@@ -41,4 +41,4 @@ if __name__ == "__main__":
     df = get_real_time_data(9000)
     df['ts'] = df.index.astype(str)
     app.layout = serve_layout(df)
-    app.run_server(debug=True)
+    app.run_server(host="0.0.0.0", port=4200)
