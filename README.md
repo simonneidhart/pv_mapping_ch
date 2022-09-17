@@ -11,7 +11,7 @@ Map the total pv power produced in Switzerland in real-time
 │   ├── irradiance.py                       # Estimation of irradiance from power, as well as irradiance conversions
 │   ├── models.py                           # Data model definitions
 │   ├── output.py                           # Prediction of output power from irradiance data.
-│   └── source                              
+│   └── source
 │       ├── __init__.py                     # Abstract base class of SourceThread
 │       ├── offline.py                      # OfflineSourceThread, dummy data source for demo purposes
 │       └── online.py                       # OnlineSourceThread, not implemented yet.
@@ -28,18 +28,27 @@ Map the total pv power produced in Switzerland in real-time
 
 # Architecture
 
+
 ```mermaid
 flowchart LR
-  Y -->|kW, lat/lon| Z[Dashboard]
 
-  W[PV Measurements<br>] --> V[Global Irradiation]
 
-  V --> U[dni/dhi]
-  U --> Q[kW simulated]
+  aliunidGW[aliunid Gateways] -->|real-time<br>mesaurements| PsqlMeasurements[(<b>pv_meters</b><br>PostgreSQL<br>database)]
 
-  X[(<b>Memory</b><br>PV Metadata<br>of all PV plants<br>of Switzerland)] --> Q
-  Y[(<b>PostgreSQL</b><br>kw for each<br>PV plant of<br>Switzerland)]
+  PsqlMeasurements --> ghi[Global Irradiance]
 
-  Q --> Y
+  ghi --> dni[dni/dhi]
+
+  dni --> Simulation[Simulation]
+
+  Simulation -->|update simulated values| PsqlPlants
+
+  PsqlMeasurements -->|precompute nearest<br>measurement point<br>for every plant| PsqlPlants[(<b>pv_plants</b><br>PostgreSQL<br>database)]
+
+  Pronovo[Pronovo Data] -->|Metadata for each<br>plant in Switzerland| PsqlPlants
+
+  PsqlPlants -->|kW, lat/lon| Dashboard[Dashboard]
+
 
 ```
+
