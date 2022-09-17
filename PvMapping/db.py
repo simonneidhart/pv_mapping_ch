@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 import dotenv
 import numpy as np
@@ -9,7 +9,6 @@ import psycopg2 as pg
 import sqlalchemy.engine
 from psycopg2.extras import execute_values, execute_batch
 from sqlalchemy import create_engine
-from tqdm import tqdm
 
 from PvMapping.models import Meter, Plant
 
@@ -202,26 +201,30 @@ class Database:
         self.connection.commit()
         return plants
 
-    def get_real_time_data(self, duration_hours: int) -> pd.DataFrame:
+    def get_real_time_data(
+        self, time_start: datetime, time_end: datetime
+    ) -> pd.DataFrame:
         """Get the real-time data for the preceding hours.
 
         Parameters
         ----------
-        duration_hours
-            The number of hours before now since which to include data.
+        time_start
+            The earliest time of the data to include
+        time_end
+            The latest time of the data to include
 
         Returns
         -------
         pd.DataFrame
             Dataframe with timestamp index and columns "power_kw", "lat", "lon".
         """
-        earliest_timestamp = datetime.utcnow() - timedelta(hours=duration_hours)
         cursor = self.connection.cursor()
         cursor.execute(
             "SELECT timestamp, power_kw, lat, lon FROM pv_real_time "
             "JOIN pv_plants ON pv_plants.id = pv_real_time.plant_id "
-            "WHERE timestamp >= %s",
-            (earliest_timestamp,),
+            "WHERE timestamp BETWEEN %s AND %s "
+            "ORDER BY timestamp DESC",
+            (time_start, time_end),
         )
         data = cursor.fetchall()
         self.connection.commit()

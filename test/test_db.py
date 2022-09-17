@@ -1,4 +1,5 @@
 import pprint
+from datetime import datetime
 
 import dotenv
 
@@ -26,7 +27,9 @@ def test_get_meter_metadata() -> None:
 
 def test_get_real_time_data() -> None:
     db = Database()
-    df = db.get_real_time_data(duration_hours=1)
+    df = db.get_real_time_data(
+        datetime.fromisoformat("2022-08-01"), datetime.fromisoformat("2022-08-02")
+    )
     pprint.pp(df)
 
 
