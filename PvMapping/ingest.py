@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import logging
+import multiprocessing
 import queue
+
+import sys
+sys.path.append("/Users/Nicolas/Documents/edh22/pv_mapping_ch")
 
 import pandas as pd
 
@@ -58,8 +62,12 @@ def ingest() -> None:
             # then update the estimates accordingly.
             affected_plants = db.get_affected_plants(item.meter_id)
             plant_ids = []
-            estimated_powers_kw = []
             for plant in affected_plants:
+                plant_ids.append(plant.id_)
+
+            global power_estimate
+
+            def power_estimate(plant):
                 estimated_power = output_simulator.pv_output(
                     installed_capacity=plant.installed_capacity_kw,
                     weather_data=pd.DataFrame.from_dict(
@@ -72,8 +80,10 @@ def ingest() -> None:
                     lat=plant.lat,
                     lon=plant.lon,
                 )
-                plant_ids.append(plant.id_)
-                estimated_powers_kw.append(estimated_power)
+                return estimated_power
+            
+            with multiprocessing.Pool() as pool:
+                estimated_powers_kw = pool.map(power_estimate, affected_plants)
 
             # Perform batched update of real-time power estimate for all affected plants.
             for plant_id, power_kw in zip(plant_ids, estimated_powers_kw):
@@ -90,7 +100,7 @@ def ingest() -> None:
                     )
                 )
 
-            out_df.to_pickle("/home/mathis/Downloads/pv_real_time.pkl")
+            out_df.to_pickle("./pv_real_time.pkl")
 
         except queue.Empty:
             pass
@@ -98,7 +108,6 @@ def ingest() -> None:
         except KeyboardInterrupt:
             source_thread.stop()
             break
-
 
 if __name__ == "__main__":
     ingest()
