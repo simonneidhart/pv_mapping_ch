@@ -5,8 +5,8 @@ import numpy as np
 px.set_mapbox_access_token("pk.eyJ1IjoiY2hyaXN0b3BoaHVuemlrZXIiLCJhIjoiY2pqc2swc253Mnd0aTN3cGJucG41dWExOSJ9.6mhBXjFCMSzNQRk8u6LTHQ")
 np.random.seed(0)
 
-N = 500
-n_frames = 12
+N = 20
+n_frames = 9
 lat = np.concatenate([
     np.random.randn(N) * 0.5 + np.cos(i / n_frames * 2 * np.pi) + 10
     for i in range(n_frames)

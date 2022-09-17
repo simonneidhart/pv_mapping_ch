@@ -13,17 +13,12 @@ def serve_layout(df_pvin):
     sMBT = 'pk.eyJ1IjoiY2hyaXN0b3BoaHVuemlrZXIiLCJhIjoiY2pqc2swc253Mnd0aTN3cGJucG41dWExOSJ9.6mhBXjFCMSzNQRk8u6LTHQ'
     px.set_mapbox_access_token(sMBT)
 
-    N = 500
-    n_frames = 12
-
-
-
     fig = ff.create_hexbin_mapbox(
         data_frame=df_pvin,
         lat="lat",
         lon="lon",
         nx_hexagon=100,
-        animation_frame='frame',
+        animation_frame=df_pvin['frame'],
         opacity=0.5,
         color_continuous_scale="Cividis",
         labels={"color": "Point Count",  "frame": "Period"},
@@ -35,10 +30,10 @@ def serve_layout(df_pvin):
     fig.update_layout(
         autosize=True,
         margin=dict(l=0, r=35, t=0, b=0),
-        mapbox={'style': 'dark',},
+        mapbox={'style': 'dark'},
     )
-    # fig.layout.sliders[0].pad.t=20
-    # fig.layout.updatemenus[0].pad.t=40
+    fig.layout.sliders[0].pad.t=20
+    fig.layout.updatemenus[0].pad.t=40
 
     return html.Div(dcc.Graph(id='map', figure=fig))
 
@@ -51,7 +46,7 @@ if __name__ == "__main__":
     df_pv_plants['frame']=1
 
     df_pv_plants_2 = pd.DataFrame(pv_plants, columns=['id', 'lat', 'lon'])
-    df_pv_plants['frame']=2
+    df_pv_plants_2['frame']=2
 
     df_pv_plants = pd.concat([df_pv_plants, df_pv_plants_2], axis=0)
 
