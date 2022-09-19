@@ -26,7 +26,7 @@ def serve_layout(df_pvin, pv_sum):
         data_frame=df_pvin,
         lat="lat",
         lon="lon",
-        nx_hexagon=150,
+        nx_hexagon=15,
         animation_frame='ts',
         color='power_kw',
         agg_func=np.sum,
@@ -49,7 +49,7 @@ def serve_layout(df_pvin, pv_sum):
 
     figheight=700
     line_figure = go.Figure(layout={"height":figheight})
-    line_figure.add_trace(go.Scatter(x=pv_sum.index, y=pv_sum['kW'], fill='tozeroy', name='Total Power [kW]'))
+    line_figure.add_trace(go.Scatter(x=pv_sum.index, y=pv_sum['power_kw'], fill='tozeroy', name='Total Power [kW]'))
 
     line_figure.update_layout(
         xaxis_title="Timestamp (UTC)",
@@ -67,7 +67,7 @@ def serve_layout(df_pvin, pv_sum):
                         'width': 'auto',
                         'margin-bottom': '50px',
                         'margin-left': '-35px',
-                        'margin-top': '-50px',}
+                        'margin-top': '-70px',}
                 ),
                 html.Img(src=app.get_asset_url('hackdays.png'),
                                         id = 'hackdays',
@@ -75,7 +75,7 @@ def serve_layout(df_pvin, pv_sum):
                                             'width': 'auto',
                                             'margin-bottom': '50px',
                                             'margin-left': '100px',
-                                            'margin-top': '-50px',}
+                                            'margin-top': '-70px',}
                                     ),
             ]
         ),
@@ -129,7 +129,8 @@ def get_real_time_data():
         connection.commit()
         df = pd.DataFrame(data=data, columns=["timestamp", "power_kw", "lat", "lon"])
         df = df.set_index("timestamp")
-        df.to_csv('export_csv.csv')
+        #df = pd.read_csv('export_csv.csv',index_col=0)
+        df = df[df.power_kw<10000]
         return df
 
 if __name__ == "__main__":
