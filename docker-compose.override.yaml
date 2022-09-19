@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  postgres:
+    build:
+      context: ./database
+    container_name: pv-realtime
+    tty: true # docker run -d
+    stdin_open: true # docker run -i
+    environment:
+      - POSTGRES_PASSWORD=dummypassword
+      - POSTGRES_USER=dummyuser
+      - POSTGRES_DB=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./database/:/var/lib/postgresql/
+
+
+

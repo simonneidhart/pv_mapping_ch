@@ -1,7 +1,10 @@
-.idea/
-.venv/
-**/__pycache__/
-*.pyc
+/data/
+/.idea/
+/.venv/
+/data*/
+/__pycache__/
+
+.pkl
 
 # environment variables
 .env

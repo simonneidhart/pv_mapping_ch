@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.figure_factory as ff
 from dash import Dash, dcc, html
@@ -24,6 +25,11 @@ def serve_layout(df_pvin):
         show_original_data=True,
         original_data_marker=dict(size=4, opacity=0.6, color="deeppink"),
     )
+
+
+    fig.update_layout(margin=dict(b=0, t=0, l=0, r=0))
+    fig.layout.sliders[0].pad.t=20
+    fig.layout.updatemenus[0].pad.t=40
 
     fig.update_layout(
         autosize=False,
