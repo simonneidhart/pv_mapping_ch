@@ -231,3 +231,11 @@ class Database:
         df = pd.DataFrame(data=data, columns=["timestamp", "power_kw", "lat", "lon"])
         df = df.set_index("timestamp")
         return df
+
+    def get_all_plant_ids(self) -> list[int]:
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT DISTINCT id FROM pv_plants")
+        ids = cursor.fetchall()
+        ids = [i[0] for i in ids]
+        self.connection.commit()
+        return ids
