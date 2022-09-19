@@ -8,3 +8,5 @@
 
 # environment variables
 .env
+
+data/

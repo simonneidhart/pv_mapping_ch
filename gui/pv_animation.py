@@ -5,6 +5,18 @@ import plotly.figure_factory as ff
 from dash import Dash, dcc, html
 import plotly.graph_objects as go
 
+from datetime import datetime
+import dotenv
+import numpy as np
+import pandas as pd
+import psycopg2 as pg
+import sqlalchemy.engine
+from psycopg2.extras import execute_values, execute_batch
+from sqlalchemy import create_engine
+import os
+
+dotenv.load_dotenv()
+
 app = Dash(__name__)
 
 def serve_layout(df_pvin, pv_sum):
@@ -14,9 +26,9 @@ def serve_layout(df_pvin, pv_sum):
         data_frame=df_pvin,
         lat="lat",
         lon="lon",
-        nx_hexagon=200,
+        nx_hexagon=15,
         animation_frame='ts',
-        color='kW',
+        color='power_kw',
         agg_func=np.sum,
         opacity=0.5,
         color_continuous_scale="Cividis",
@@ -37,7 +49,7 @@ def serve_layout(df_pvin, pv_sum):
 
     figheight=700
     line_figure = go.Figure(layout={"height":figheight})
-    line_figure.add_trace(go.Scatter(x=pv_sum.index, y=pv_sum['kW'], fill='tozeroy', name='Total Power [kW]'))
+    line_figure.add_trace(go.Scatter(x=pv_sum.index, y=pv_sum['power_kw'], fill='tozeroy', name='Total Power [kW]'))
 
     line_figure.update_layout(
         xaxis_title="Timestamp (UTC)",
@@ -55,7 +67,7 @@ def serve_layout(df_pvin, pv_sum):
                         'width': 'auto',
                         'margin-bottom': '50px',
                         'margin-left': '-35px',
-                        'margin-top': '-50px',}
+                        'margin-top': '-70px',}
                 ),
                 html.Img(src=app.get_asset_url('hackdays.png'),
                                         id = 'hackdays',
@@ -63,7 +75,7 @@ def serve_layout(df_pvin, pv_sum):
                                             'width': 'auto',
                                             'margin-bottom': '50px',
                                             'margin-left': '100px',
-                                            'margin-top': '-50px',}
+                                            'margin-top': '-70px',}
                                     ),
             ]
         ),
@@ -77,12 +89,52 @@ def serve_layout(df_pvin, pv_sum):
 
     #return html.Div(dcc.Graph(id='map', figure=fig))
 
-def get_real_time_data(duration_hours: int) -> pd.DataFrame:
-    df = pd.read_pickle('day_09-01.pkl').head(10000)
-    return df
+def get_real_time_data():
+        """Get the real-time data for the preceding hours.
+        Parameters
+        ----------
+        time_start
+            The earliest time of the data to include
+        time_end
+            The latest time of the data to include
+        Returns
+        -------
+        pd.DataFrame
+            Dataframe with timestamp index and columns "power_kw", "lat", "lon".
+        """
+        time_start = "2022-08-01 01:00:00+00:00"
+        time_end = "2022-08-01 23:00:00+00:00"
+        host = os.getenv("POSTGRES_HOST")
+        port = os.getenv("POSTGRES_PORT")
+        username = os.getenv("POSTGRES_USER")
+        password = os.getenv("POSTGRES_PASSWORD")
+        database = os.getenv("POSTGRES_DATABASE")
+        print(password)
+        connection = pg.connect(
+            database=database,
+            user=username,
+            password=password,
+            host=host,
+            port=port,
+        )
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT timestamp, power_kw, lat, lon FROM pv_real_time "
+            "JOIN pv_plants ON pv_plants.id = pv_real_time.plant_id "
+            "WHERE timestamp BETWEEN %s AND %s "
+            "ORDER BY timestamp DESC",
+            (time_start, time_end),
+        )
+        data = cursor.fetchall()
+        connection.commit()
+        df = pd.DataFrame(data=data, columns=["timestamp", "power_kw", "lat", "lon"])
+        df = df.set_index("timestamp")
+        #df = pd.read_csv('export_csv.csv',index_col=0)
+        df = df[df.power_kw<10000]
+        return df
 
 if __name__ == "__main__":
-    df = get_real_time_data(9000)
+    df = get_real_time_data()
     df['ts'] = df.index.astype(str)
     pv_sum = df.drop(columns=['ts','lat','lon'])
     pv_sum = pv_sum.groupby(pv_sum.index).sum()
